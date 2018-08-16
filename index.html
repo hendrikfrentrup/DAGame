@@ -2,82 +2,6 @@
 <html>
   <head>
     <title>DAGame</title>
-    <!-- <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font: 13px Helvetica, Arial; }
-      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
-      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
-      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
-      #messages { list-style-type: none; margin: 0; padding: 0; }
-      #messages li { padding: 5px 10px; }
-      #messages li:nth-child(odd) { background: #eee; }
-    </style> -->
-
-    <style>
-        .modal-mask {
-        position: fixed;
-        z-index: 9998;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, .5);
-        display: table;
-        transition: opacity .3s ease;
-        }
-
-        .modal-wrapper {
-        display: table-cell;
-        vertical-align: middle;
-        }
-
-        .modal-container {
-        width: 300px;
-        margin: 0px auto;
-        padding: 20px 30px;
-        background-color: #fff;
-        border-radius: 2px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
-        transition: all .3s ease;
-        font-family: Helvetica, Arial, sans-serif;
-        }
-
-        .modal-header h3 {
-        margin-top: 0;
-        color: #42b983;
-        }
-
-        .modal-body {
-        margin: 20px 0;
-        }
-
-        .modal-default-button {
-        float: right;
-        }
-
-        /*
-        * The following styles are auto-applied to elements with
-        * transition="modal" when their visibility is toggled
-        * by Vue.js.
-        *
-        * You can easily play with the modal transition by editing
-        * these styles.
-        */
-
-        .modal-enter {
-        opacity: 0;
-        }
-
-        .modal-leave-active {
-        opacity: 0;
-        }
-
-        .modal-enter .modal-container,
-        .modal-leave-active .modal-container {
-        -webkit-transform: scale(1.1);
-        transform: scale(1.1);
-        }
-    </style>
   </head>
   <body>
 
@@ -85,6 +9,8 @@
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     <script src="game.js"></script>
 
+
+    
     <h1>
         <span id="title"> {DAG} </span>
     </h1>
@@ -105,16 +31,6 @@
     </div> 
 
     <hr>
-
-<!-- 
-    <div class="extraPlayerTemplate">
-        <div class="controls controls-row">
-            <button class="span3" value="good" type="text" name="1">good </button>
-            
-        </div>
-    </div>
-
-    <div id="container"></div> -->
 
     <div>
         <h2> Play someone (Active players: <span id="numactiveusers"></span>): </h2>
@@ -142,115 +58,6 @@
             <button>Send</button>
             </form>
         </div>
-
-
-    <script>
-
-    var data = {
-                title:'test',
-                message: 'Decentralized Ominous God',
-                playerid: 1,
-                score: '100',
-
-                players: [
-                    { id: 2, name: 'Player 2', score: 100 },
-                    { id: 3, name: 'Player 3', score: 100 },
-                    { id: 4, name: 'Player 4', score: 100 }
-                ],
-
-                playrequests: [
-                    { id: 2, name: 'Player 2' },
-                ],
-
-                newPlayerName: '',
-                nextPlayerId: 5,
-            };
-
-
-        // Vue.component('player-item', {
-        //     template: `
-        //         <li>
-        //         {{ name }}
-                
-        //         <button id="play-good" v-on:click="$emit('play-good')">Good</button>
-        //         or
-        //         <button id="play-evil" v-on:click="$emit('play-evil')">Evil</button>
-        //         </li>
-        //     `,
-        //     props: ['name']
-        // }) 
-        
-        // Vue.component('play-message', {
-        //     template: `
-        //         <li>
-        //         {{ name }} wants to play
-        //         </li>
-        //     `,
-        //     props: ['name']
-        // })
-
-
-        // var app = new Vue({
-        //     el: '#app',
-
-        //     data: {
-        //         title:'test',
-        //         message: 'Decentralized Ominous God',
-        //         playerid: 1,
-        //         score: '100',
-
-        //         players: [
-        //             { id: 2, name: 'Player 2', score: 100 },
-        //             { id: 3, name: 'Player 3', score: 100 },
-        //             { id: 4, name: 'Player 4', score: 100 }
-        //         ],
-
-        //         playrequests: [
-        //             { id: 2, name: 'Player 2' },
-        //         ],
-
-        //         newPlayerName: '',
-        //         nextPlayerId: 5,
-        //     },
-            
-        //     methods: {
-        //         addNewPlayer: function () {
-        //             this.players.push({
-        //                 id: this.nextPlayerId++,
-        //                 name: this.newPlayerName,
-        //                 score: 100
-        //             })
-        //             this.newPlayerName = ''
-        //         },
-        //         addPlayRequest: function () {
-        //             socket.emit('play', {
-        //                 id: this.nextPlayerId++,
-        //                 name: this.newPlayerName,
-        //                 score:100
-        //             });
-        //             // modify the DOM
-        //             // this.playrequests.push({
-        //             //     id: this.nextPlayerId++,
-        //             //     name: this.newPlayerName,
-        //             //     score:100
-        //             // })
-        //         }
-        //     }
-        // })
-
-
-        // var socket = io();
-
-        // socket.on('stream', function(msg){
-        //     app.title = msg.title;
-        // });
-
-        // socket.on('play', function(msg){
-        //     console.log('adding play: ' + msg);
-        //     app.playrequests.push({id: nextPlayerId, name: 'Player 5', score: 100})
-        // });
-
-    </script>
 
   </body>
 </html>
