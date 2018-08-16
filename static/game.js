@@ -1,29 +1,53 @@
 var socket = io();
-var score = 100;
+//var score = 100;
 var playername;
 
-function playEvil(){
-    console.log("playing evil");
-    score-=10;
-    $('#score').text(score);
-    var recepient = "rrr";
-    socket.emit('play request', {type:"evil",from:playername, to:recepient});
-    console.log("play request sent to");
-};
+function playEvil(player){
+    console.log("playing evil" + player);
+    //score-=10;
+    //$('#score').text(score);
+    //var recepient = "rrr";
+    socket.emit('play request', {type:"evil",from:playername, to:player});
+}
 
-function playGood(){
-    console.log("playing good with", recepient);
-    score-=10;
-    $('#score').text(score);
-};
+function playGood(player){
+    console.log("playing good with" + player);
+    //score-=10;
+    socket.emit('play request', {type:"good",from:playername, to:player});
+}
 
+function addToActivePlayerList(player){
+    $('#activeplayers')
+    .append($('<li>').text(player)
+            .append(createGoodButtonFor(player))
+            .append(createEvilButtonFor(player))
+        );
+}
+
+function iJustConnected(players){
+    return players.indexOf(playername) == -1;
+}
+
+function createGoodButtonFor(player){
+    return $('<button id="play-good">')
+            .text("good")
+            .click(function(){
+                playGood(player);
+            });
+}
+
+function createEvilButtonFor(player){
+    return $('<button id="play-evil">')
+            .text("evil")
+            .click(function(){
+                playEvil(player);
+            });
+}
 
 socket.on('login', function(data){
     console.log('active users: ', data.numUsers);
     $('#numactiveusers').text(data.numUsers);
 });
-
-
 
 socket.on('play request', function(data){
     if (data.to==playername){
@@ -36,7 +60,7 @@ socket.on('play request', function(data){
             );
     }
     else{
-        console.log('not for me')
+        console.log('not for me');
     }
 });
 
@@ -65,10 +89,15 @@ socket.on('disconnect', function(){
     console.log('server down!');
 });
 
-$(function () {
+socket.on('fill active players', function(data){
+    if(iJustConnected(data.players)){
+        data.players.forEach(function(player){
+            addToActivePlayerList(player);
+        });
+    }
+});
 
-    $('#score').text("-");
-    $('#plid').text("-");
+$(function () {
 
     $('#send').submit(function(){
         // $('#messages').append($('<li>').text('-'+msg));
@@ -78,8 +107,8 @@ $(function () {
         return false;
     });
 
-
-
+    playername = $('#plid').text();
+    socket.emit('add player', playername);
 
     // set player name
     $('#setplayerid').submit(function(){
@@ -109,13 +138,9 @@ $(function () {
     //     addParticipantsMessage(data);
     // });
     socket.on('player added', function(data){
-        var other_playername=data.username
-        console.log('player registered: ' + other_playername);  
-        $('#activeplayers')
-        .append($('<li>').text(other_playername)
-                .append($('<button id="play-good" onclick="playGood()">').text("good"))
-                .append($('<button id="play-evil" onclick="playEvil()">').text("evil"))
-            );
+        var other_playername = data.username;
+        console.log('player registered: ' + other_playername);
+        addToActivePlayerList(other_playername);
     });
 
 

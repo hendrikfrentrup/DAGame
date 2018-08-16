@@ -69,31 +69,31 @@ app.get('/logout', function (req, res) {
   res.redirect('/login');
 });
 
-var user_id=0;
 var numUsers=0;
+var players = [];
 
 io.on('connection', function(socket){
-    var addedUser = false;
+    //var addedUser = false;
 
-    console.log('connection established, socketID:' + socket.id)
+    console.log('connection established, socketID:' + socket.id);
+
+    socket.emit('fill active players', {players: players});
 
     // when the client emits 'add player', this listens and executes
     socket.on('add player', function(username){
-        if (addedUser) return;
+        //if (addedUser) return;
 
         // we store the username in the socket session for this client
         socket.username = username;
-        ++numUsers;
-        addedUser = true;
-        console.log('player registered: ', username ,', active players: ', numUsers)
-        socket.emit('login', {
-        numUsers: numUsers
-        });
+        players.push(username);
+        //addedUser = true;
+        console.log('player registered: ', username ,', active players: ', players.length);
+        io.emit('login', { numUsers: players.length });
 
         // echo globally (all clients) that a person has connected
         socket.broadcast.emit('player added', {
-        username: socket.username,
-        numUsers: numUsers
+            username: socket.username,
+            numUsers: players.length
         });
     });
 
