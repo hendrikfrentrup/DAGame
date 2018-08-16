@@ -127,13 +127,16 @@ io.on('connection', function(socket){
                         return play.id == data.id;
                     });
 
-        var newScores = {};
-        newScores[play.requester] = 90;
-        newScores[play.receiver] = 80;
+        //hendrick's part
 
-        console.log(newScores);
+        scores[play.requester] += 10;
+        scores[play.receiver] -= 10;
 
-        io.emit('updated scores', newScores);
+        console.log(scores);
+
+        io.emit('updated scores', scores);
+
+        io.emit('remove pending play', play.id);
     });
 
 

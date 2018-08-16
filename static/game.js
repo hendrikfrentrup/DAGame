@@ -27,10 +27,6 @@ function addToActivePlayerList(player){
         );
 }
 
-function iJustConnected(players){
-    return players.indexOf(playername) == -1;
-}
-
 function createGoodButtonFor(player){
     return $('<button id="play-good">')
             .text("good")
@@ -109,17 +105,22 @@ socket.on('disconnect', function(){
 });
 
 socket.on('fill active players', function(data){
-    if(iJustConnected(data.players)){
-        data.players.forEach(function(player){
-            addToActivePlayerList(player);
-        });
-    }
+    data
+    .players
+    .filter(function(player){ return player != playername;})
+    .forEach(function(player){
+        addToActivePlayerList(player);
+    });
 });
 
 socket.on('updated scores', function(scores){
     if(scores.hasOwnProperty(playername)){
         $('#score').text(scores[playername]);
     }
+});
+
+socket.on('remove pending play', function(id){
+    $('#' + id).remove();
 });
 
 $(function () {
