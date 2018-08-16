@@ -1,0 +1,310 @@
+<!doctype html>
+<html>
+  <head>
+    <title>DAGame</title>
+    <!-- <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+    </style> -->
+
+    <style>
+        .modal-mask {
+        position: fixed;
+        z-index: 9998;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, .5);
+        display: table;
+        transition: opacity .3s ease;
+        }
+
+        .modal-wrapper {
+        display: table-cell;
+        vertical-align: middle;
+        }
+
+        .modal-container {
+        width: 300px;
+        margin: 0px auto;
+        padding: 20px 30px;
+        background-color: #fff;
+        border-radius: 2px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
+        transition: all .3s ease;
+        font-family: Helvetica, Arial, sans-serif;
+        }
+
+        .modal-header h3 {
+        margin-top: 0;
+        color: #42b983;
+        }
+
+        .modal-body {
+        margin: 20px 0;
+        }
+
+        .modal-default-button {
+        float: right;
+        }
+
+        /*
+        * The following styles are auto-applied to elements with
+        * transition="modal" when their visibility is toggled
+        * by Vue.js.
+        *
+        * You can easily play with the modal transition by editing
+        * these styles.
+        */
+
+        .modal-enter {
+        opacity: 0;
+        }
+
+        .modal-leave-active {
+        opacity: 0;
+        }
+
+        .modal-enter .modal-container,
+        .modal-leave-active .modal-container {
+        -webkit-transform: scale(1.1);
+        transform: scale(1.1);
+        }
+    </style>
+  </head>
+  <body>
+
+
+    <!-- development version, includes helpful console warnings -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+
+
+
+
+    <!-- template for the modal component -->
+    <script type="text/x-template" id="modal-template">
+        <transition name="modal">
+        <div class="modal-mask">
+            <div class="modal-wrapper">
+            <div class="modal-container">
+    
+                <div class="modal-header">
+                <slot name="header">
+                    default header
+                </slot>
+                </div>
+    
+                <div class="modal-body">
+                <slot name="body">
+                    default body
+                </slot>
+                </div>
+    
+                <div class="modal-footer">
+                <slot name="footer">
+                    default footer
+                    <button class="modal-default-button" @click="$emit('close')">
+                    OK
+                    </button>
+                </slot>
+                </div>
+            </div>
+            </div>
+        </div>
+        </transition>
+    </script>
+
+
+    <div id="app">
+        <h1>
+            {{ message }}
+        </h1>
+
+        <div>
+            <span><input v-model="playerid" autocomplete="off" /></span>
+            <span> You are monk </span> <span> {{ playerid }} </span>   
+        </div>
+
+        <div>
+            <h2><span> Your score: </span> <span> {{ score }} </span> </h2>
+        </div> 
+
+
+                <form v-on:submit.prevent="addNewTodo">
+                  <label for="new-todo">Add a round</label>
+                  <input
+                    v-model="newTodoText"
+                    id="new-todo"
+                    placeholder="round"
+                  >
+                  <button>Add</button>
+                </form>
+                <ul>
+                  <li
+                    is="todo-item"
+                    v-for="(todo, index) in todos"
+                    v-bind:key="todo.id"
+                    v-bind:title="todo.title"
+                    v-on:remove="todos.splice(index, 1)"
+                    v-on:click="showModal = true"
+                  ></li>
+
+                    
+                </ul>
+
+        <ul>
+            <!-- <player-list players=players></player-list> -->
+            <li v-for="p in players">
+                {{ p.name }} (score: {{ p.score }})
+                <button v-on:click="showModal = true" id="show-modal">Pray.</button>
+            </li>
+        </ul>
+                <!-- use the modal component, pass in the prop -->
+                <modal v-if="showModal" @close="showModal = false">
+                        <!--
+                        you can use custom content here to overwrite
+                        default content
+                        -->
+                        <h3 slot="header">Play a round.</h3>
+                        <h4 slot="body">You are playing player - Good or Evil</h4>
+                        <!-- <h4 slot="footer">Good or Evil</h4> -->
+                    </modal>
+
+    </div>
+
+
+    <br><hr><br>
+    <div>
+        <ul id="messages"></ul>
+        <form action="">
+          <input id="m" autocomplete="off" />
+          <button>Send</button>
+        </form>
+    </div>
+
+
+
+    <script>
+
+
+
+        // register modal component
+        Vue.component('modal', {
+            props:['me','opponent'],
+            template: '#modal-template'
+        })
+
+        Vue.component('todo-item', {
+            template: `
+                <li>
+                {{ title }}
+                <button v-on:click="$emit('remove')">Remove</button>
+                <button id="show-modal" @click="showModal = true">Pray.</button>
+                <modal v-if="showModal" @close="showModal = false"></modal>
+                </li>
+            `,
+            props: ['title']
+        })  
+
+        // Vue.component('player-list', {
+        //     props:['players'],
+        //     template: `
+        //     <li v-for="p in players">
+        //         {{ p.name }} (score: {{ p.score }})
+        //         <!-- , v-bind:value="p.id" -->
+        //         <button id="show-modal" @click="showModal = true">Pray.</button>
+        //     </li>
+        //     `
+        // })
+
+        var app = new Vue({
+            el: '#app',
+            data: {
+                message: 'Decentralized Ominous God',
+                playerid: 100,
+                score: '1000',
+                showModal: false,
+                players: [
+                { id: 2, name: 'Monk 2', score: 100 },
+                { id: 3, name: 'Monk 3', score: 100 },
+                { id: 4, name: 'Monk 4', score: 100 }
+                ],
+
+                newTodoText: '',
+                todos: [
+                {
+                    id: 1,
+                    title: 'round1',
+                },
+                {
+                    id: 2,
+                    title: 'round2',
+                },
+                {
+                    id: 3,
+                    title: 'round3'
+                }
+                ],
+                nextTodoId: 4
+            },
+            
+            methods: {
+                addNewTodo: function () {
+                this.todos.push({
+                    id: this.nextTodoId++,
+                    title: this.newTodoText
+                })
+                this.newTodoText = ''
+                }
+            }
+        })
+
+        
+
+
+
+
+
+
+
+
+        $(function () {
+
+            var socket = io();
+
+            $('form').submit(function(){
+                // $('#messages').append($('<li>').text('-'+msg));
+                socket.emit('chat message', $('#m').val());
+                $('#m').val('');
+                return false;
+            });
+
+            socket.on('chat message', function(msg){
+                console.log('chat msg: ' + msg);  
+                $('#messages').append($('<li>').text(msg));
+            });
+
+            socket.on('status', function(msg){
+                console.log('status: ' + msg);  
+                $('#messages').append($('<li style="color:blue;font-size:8px;">').text(msg));
+            });
+
+        });
+
+
+
+
+
+    </script>
+
+  </body>
+</html>

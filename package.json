@@ -1,0 +1,25 @@
+{
+  "name": "dagame",
+  "version": "1.0.0",
+  "description": "DAGame for blockchain believers",
+  "main": "app.js",
+  "dependencies": {
+    "express": "^4.16.3",
+    "socket.io": "^2.1.1",
+    "vue": "^2.5.17"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hendrikfrentrup/DAGame.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hendrikfrentrup/DAGame/issues"
+  },
+  "homepage": "https://github.com/hendrikfrentrup/DAGame#readme"
+}
