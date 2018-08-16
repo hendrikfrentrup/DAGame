@@ -16,6 +16,10 @@ var auth = function(req, res, next) {
     res.redirect('/login');
 };
 
+var id = function(){
+    return Math.random().toString(36).substr(2, 9);
+};
+
 var session = require('express-session');
 app.use(session({
     secret: '2C44-4D44-WppQ38S',
@@ -71,6 +75,7 @@ app.get('/logout', function (req, res) {
 
 var numUsers=0;
 var players = [];
+var pendingPlays = [];
 
 io.on('connection', function(socket){
     //var addedUser = false;
@@ -103,10 +108,20 @@ io.on('connection', function(socket){
     socket.on('play request', function(data){
         // play requested from - to -> private message
         console.log(data.type, ' play requested from ', data.from);
+
+        pendingPlays.push({
+            id: id(),
+            requester: data.from,
+            receiver: data.to,
+            type: data.type
+        });
+
         io.emit('play request', data);
     });
 
-    
+    socket.on('respond request', function(data){
+        
+    });
 
 
     // send private message to user with new ID
