@@ -25,6 +25,11 @@ var generateId = function(){
     return Math.random().toString(36).substr(2, 9);
 };
 
+var updateScores = function(play, receiverResponse){
+    scores[play.requester] += 10;
+    scores[play.receiver] -= 10;
+};
+
 var session = require('express-session');
 app.use(session({
     secret: '2C44-4D44-WppQ38S',
@@ -127,10 +132,7 @@ io.on('connection', function(socket){
                         return play.id == data.id;
                     });
 
-        //hendrick's part
-
-        scores[play.requester] += 10;
-        scores[play.receiver] -= 10;
+        updateScores(play, data.type);
 
         console.log(scores);
 
