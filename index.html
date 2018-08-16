@@ -81,141 +81,72 @@
   </head>
   <body>
 
-
-    <!-- development version, includes helpful console warnings -->
-    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="game.js"></script>
 
-
-
-    <div id="app">
-
-        <h1>
-            {{ message }}
-        </h1>
-       
-        <div>
-            <p>
-                <span> Your player ID: </span> <span> {{ playerid }} </span>
-                <span> Change your player ID:
-                <input v-model="playerid" autocomplete="off" /></span>
-            </p>
-        </div>
-
-        <div>
-            <h2><span> Your score: </span> <span> {{ score }} </span> </h2>
-        </div> 
-
-        <hr>
-
-        <div>
-            <h2> Play someone: </h2>
-        <!-- <form v-on:submit.prevent="addNewPlayer">
-            <label for="new-player">Add a player:</label>
-            <input
-            v-model="newPlayerName"
-            id="new-player"
-            placeholder="..."
-            >
-            <button>Add</button>
+    <h1>
+        <span id="title"> {DAG} </span>
+    </h1>
+    
+    <div>
+        <p>   
+            Set your player name:
+            <form id="setplayerid" action="">
+                <input id="playerid" autocomplete="off" />
+                <button>Join</button>
             </form>
-        -->
-           <ul>
-                <li
-                is="player-item"
-                v-for="(player, index) in players"
-                v-bind:key="player.id"
-                v-bind:name="player.name"
-                v-on:play-good="addPlayRequest"
-                v-on:play-evil="score-=10"
-                ></li>
-            </ul>
+        </p>
+    </div>
 
+    <div>
+        <h2>Your player ID: <span id="plid">  {id} </span></h2>
+        <h2>Your score:     <span id="score"> {score} </span> </h2>
+    </div> 
+
+    <hr>
+
+<!-- 
+    <div class="extraPlayerTemplate">
+        <div class="controls controls-row">
+            <button class="span3" value="good" type="text" name="1">good </button>
+            
         </div>
+    </div>
 
-        <!-- <ul>
-            <li v-for="p in players">
-                {{ p.name }} (score: {{ p.score }})
-            </li>
-        </ul> -->
+    <div id="container"></div> -->
 
-        <hr>
+    <div>
+        <h2> Play someone (Active players: <span id="numactiveusers"></span>): </h2>
+        <ul id="activeplayers"></ul>
+    </div>
 
+    <hr>
 
-
-        <div>
-            <h3> Someone wants to play: </h3>
-
-            {{ title }}
-
-            <ul>
-                <li
-                is="play-message"
-                v-for="(player, index) in playrequests"
-                v-bind:key="player.id"
-                v-bind:name="player.name"
-                ></li>
-            </ul>
-
-        </div>
+    <div>
+        <h3> Someone wants to play: </h3>
+        <ul id="playrequests"></ul>
+    </div>
 
     <hr>
 
         <div>
-            <h3> Backchannel: </h3>
+            <h3> Events + Backchannel: </h3>
         </div>
 
         <div>
             <ul id="messages"></ul>
-            <form action="">
+
+            <form id="send" action="">
             <input id="m" autocomplete="off" />
             <button>Send</button>
             </form>
         </div>
 
-    </div>
 
     <script>
 
-        Vue.component('player-item', {
-            template: `
-                <li>
-                {{ name }}
-                
-                <button id="play-good" v-on:click="$emit('play-good')">Good</button>
-                or
-                <button id="play-evil" v-on:click="$emit('play-evil')">Evil</button>
-                </li>
-            `,
-            props: ['name']
-        }) 
-        
-        Vue.component('play-message', {
-            template: `
-                <li>
-                {{ name }} wants to play
-                </li>
-            `,
-            props: ['name']
-        })
-
-
-        var socket = io();
-
-        socket.on('stream', function(msg){
-            app.title = msg.title;
-        });
-
-        socket.on('play', function(msg){
-            console.log('adding play: ' + msg);
-            app.playrequests.push({id: nextPlayerId, name: 'Player 5', score: 100})
-        });
-
-        var app = new Vue({
-            el: '#app',
-
-            data: {
+    var data = {
                 title:'test',
                 message: 'Decentralized Ominous God',
                 playerid: 1,
@@ -233,60 +164,91 @@
 
                 newPlayerName: '',
                 nextPlayerId: 5,
-            },
+            };
+
+
+        // Vue.component('player-item', {
+        //     template: `
+        //         <li>
+        //         {{ name }}
+                
+        //         <button id="play-good" v-on:click="$emit('play-good')">Good</button>
+        //         or
+        //         <button id="play-evil" v-on:click="$emit('play-evil')">Evil</button>
+        //         </li>
+        //     `,
+        //     props: ['name']
+        // }) 
+        
+        // Vue.component('play-message', {
+        //     template: `
+        //         <li>
+        //         {{ name }} wants to play
+        //         </li>
+        //     `,
+        //     props: ['name']
+        // })
+
+
+        // var app = new Vue({
+        //     el: '#app',
+
+        //     data: {
+        //         title:'test',
+        //         message: 'Decentralized Ominous God',
+        //         playerid: 1,
+        //         score: '100',
+
+        //         players: [
+        //             { id: 2, name: 'Player 2', score: 100 },
+        //             { id: 3, name: 'Player 3', score: 100 },
+        //             { id: 4, name: 'Player 4', score: 100 }
+        //         ],
+
+        //         playrequests: [
+        //             { id: 2, name: 'Player 2' },
+        //         ],
+
+        //         newPlayerName: '',
+        //         nextPlayerId: 5,
+        //     },
             
-            methods: {
-                addNewPlayer: function () {
-                    this.players.push({
-                        id: this.nextPlayerId++,
-                        name: this.newPlayerName,
-                        score: 100
-                    })
-                    this.newPlayerName = ''
-                },
-                addPlayRequest: function () {
-                    socket.emit('play', {
-                        id: this.nextPlayerId++,
-                        name: this.newPlayerName,
-                        score:100
-                    });
-                    // modify the DOM
-                    // this.playrequests.push({
-                    //     id: this.nextPlayerId++,
-                    //     name: this.newPlayerName,
-                    //     score:100
-                    // })
-                }
-            }
-        })
+        //     methods: {
+        //         addNewPlayer: function () {
+        //             this.players.push({
+        //                 id: this.nextPlayerId++,
+        //                 name: this.newPlayerName,
+        //                 score: 100
+        //             })
+        //             this.newPlayerName = ''
+        //         },
+        //         addPlayRequest: function () {
+        //             socket.emit('play', {
+        //                 id: this.nextPlayerId++,
+        //                 name: this.newPlayerName,
+        //                 score:100
+        //             });
+        //             // modify the DOM
+        //             // this.playrequests.push({
+        //             //     id: this.nextPlayerId++,
+        //             //     name: this.newPlayerName,
+        //             //     score:100
+        //             // })
+        //         }
+        //     }
+        // })
 
 
-        // $(function () {
+        // var socket = io();
 
-        //     var socket = io();
-
-        //     $('form').submit(function(){
-        //         // $('#messages').append($('<li>').text('-'+msg));
-        //         socket.emit('chat message', $('#m').val());
-        //         $('#m').val('');
-        //         return false;
-        //     });
-
-        //     socket.on('chat message', function(msg){
-        //         console.log('chat msg: ' + msg);  
-        //         $('#messages').append($('<li>').text(msg));
-        //     });
-
-        //     socket.on('status', function(msg){
-        //         console.log('status: ' + msg);  
-        //         $('#messages').append($('<li style="color:blue;font-size:8px;">').text(msg));
-        //     });
-
+        // socket.on('stream', function(msg){
+        //     app.title = msg.title;
         // });
 
-
-
-
+        // socket.on('play', function(msg){
+        //     console.log('adding play: ' + msg);
+        //     app.playrequests.push({id: nextPlayerId, name: 'Player 5', score: 100})
+        // });
 
     </script>
 
