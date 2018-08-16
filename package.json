@@ -1,8 +1,9 @@
 {
   "name": "dagame",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
+  "description": "DAGame for blockchain believers",
+  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
