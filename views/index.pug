@@ -1,48 +1,53 @@
 <!doctype html>
 <html>
   <head>
-    <title>DOG</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+    <title>DAGame</title>
   </head>
-
   <body>
-    <div class="container">
-      <div class="row">
-        <div class="col-md-2">
-          <h3 id="username">#{username}</h3>   
-        </div>
-        <div class="cold-md-2">
-          <a class="btn" href="/logout">Logout</a>
-        </div>
-      </div>
-
-      <div class="row">
-        <ul id="messages"></ul>  
-      </div>
-
-      <form role="form">  
-          <div class="row">
-            <div class="col-md-12">
-              <div class="input-group input-group-lg">
-                  <input id="m" type="text" class="form-control" autocomplete="off" />
-                  <div class="input-group-btn">
-                    <button type="submit" class="btn">Send</button>
-                  </div><!-- /btn-group -->
-              </div><!-- /input-group -->
-            </div><!-- /.col-xs-12 -->
-          </div><!-- /.row -->
-      </form>
-
-    </div>
-
-    <!-- jQuery first, then Tether, then Bootstrap JS. -->
-    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
-    script(src='game.js')
+    <script src="game.js"></script>
+
+
     
+    <h1>
+        <span id="title"> {DAG} </span>
+    </h1>
+
+    <div>
+        <h2>Your player ID: <span id="plid">  #{username} </span></h2>
+        <h2>Your score:     <span id="score"> #{score} </span> </h2>
+    </div> 
+
+    <hr>
+
+    <div>
+        <h2> Play someone (Active players: <span id="numactiveusers"></span>): </h2>
+        <ul id="activeplayers"></ul>
+    </div>
+
+    <hr>
+
+    <div>
+        <h3> Someone wants to play: </h3>
+        <ul id="playrequests"></ul>
+    </div>
+
+    <hr>
+
+        <div>
+            <h3> Events + Backchannel: </h3>
+        </div>
+
+        <div>
+            <ul id="messages"></ul>
+
+            <form id="send" action="">
+            <input id="m" autocomplete="off" />
+            <button>Send</button>
+            </form>
+        </div>
+
   </body>
 </html>

@@ -36,8 +36,8 @@ var io = require('socket.io')(http);
 app.get('/', auth, function(req, res){
   console.log(req.query.username);  
   //res.sendFile(__dirname + '/views/index.html');
-  res.sendFile(__dirname + '/index.html');
-  // res.render('index', {username: req.query.username});
+  //res.sendFile(__dirname + '/index.html');
+  res.render('index', {username: req.query.username, score: 100});
 });
 
 app.get('/login', function (req, res) {
@@ -125,10 +125,6 @@ io.on('connection', function(socket){
         console.log('chat message: ' + msg);
         io.emit('chat message', msg);
     });
-
-
-
-
 
 });
 
