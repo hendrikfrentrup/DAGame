@@ -14,8 +14,4 @@ $(document).ready(function(){
       $('#messages').append($('<li>').text(msg));
     });
 
-    socket.on('user disconnected', function(){
-      $('#messages').append($('<li>').text('some user went offline'));
-    });
-
 });
