@@ -2,6 +2,7 @@ var express = require('express');
 var app = express();
 var multipart = require('connect-multiparty');
 var multipartMiddleware = multipart();
+var url = require('url');
 
 var passwords = {
     'monk': 'pass',
@@ -23,6 +24,7 @@ app.use(session({
 }));
 
 app.use(express.static('public'));
+app.use(express.static('scripts'));
 
 app.set('view engine', 'pug');
 app.set('views', './views');
@@ -31,9 +33,9 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
 app.get('/', auth, function(req, res){
-  res.sendFile(__dirname + '/views/index.html');
-  //console.log(req.session.username);
-  //res.render('index', {username: req.session.username});
+  console.log(req.query.username);  
+  //res.sendFile(__dirname + '/views/index.html');
+  res.render('index', {username: req.query.username});
 });
 
 app.get('/login', function (req, res) {
@@ -48,7 +50,12 @@ app.post('/login', multipartMiddleware, function (req, res) {
     if (req.body.username && passwords.hasOwnProperty(req.body.username) && req.body.password && req.body.password == passwords[req.body.username]) {
             req.session.authenticated = true;
             req.session.user = req.body.username;
-            res.redirect('/');
+            res.redirect(url.format({
+               pathname:"/",
+               query: {
+                  "username": req.body.username
+                }
+             }));
     } else {
         res.redirect('/login');
     }
