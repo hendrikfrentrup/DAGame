@@ -5,8 +5,10 @@ var multipartMiddleware = multipart();
 var url = require('url');
 
 var passwords = {
-    'monk': 'pass',
-    'priest': 'word'
+    'gis': 'e',
+    'gia': 'i',
+    'edd': 'u',
+    'hen': 'd'
 };
 
 var auth = function(req, res, next) {
@@ -68,6 +70,15 @@ app.post('/login', multipartMiddleware, function (req, res) {
 
 });
 
+app.get('/reset', function (req, res) {
+    console.log('reset.');
+    numUsers=0;
+    players = [];
+    pendingPlays = [];
+    req.session.destroy();
+    res.send("Reset");
+  });
+
 app.get('/logout', function (req, res) {
   req.session.destroy();
   res.redirect('/login');
@@ -78,7 +89,7 @@ var players = [];
 var pendingPlays = [];
 
 io.on('connection', function(socket){
-    //var addedUser = false;
+    var addedUser = false;
 
     console.log('connection established, socketID:' + socket.id);
 
@@ -86,20 +97,27 @@ io.on('connection', function(socket){
 
     // when the client emits 'add player', this listens and executes
     socket.on('add player', function(username){
-        //if (addedUser) return;
+        if (addedUser) return;
+        
+        username = username.replace(/ /g,'')
 
-        // we store the username in the socket session for this client
-        socket.username = username;
-        players.push(username);
-        //addedUser = true;
-        console.log('player registered: ', username ,', active players: ', players.length);
-        io.emit('login', { numUsers: players.length });
-
-        // echo globally (all clients) that a person has connected
-        socket.broadcast.emit('player added', {
-            username: socket.username,
-            numUsers: players.length
-        });
+        if(username && (!(username in players))){
+            // we store the username in the socket session for this client
+            socket.username = username;
+            players.push(username);
+            //addedUser = true;
+            console.log('player registered: ', username ,', active players: ', players.length);
+            io.emit('login', { numUsers: players.length });
+            
+            // echo globally (all clients) that a person has connected
+            socket.broadcast.emit('player added', {
+                username: socket.username,
+                numUsers: players.length
+            });
+        }
+        else{
+            console.log('login failes - user already playing or no username given')
+        }
     });
 
 
@@ -107,20 +125,20 @@ io.on('connection', function(socket){
     // request a play 
     socket.on('play request', function(data){
         // play requested from - to -> private message
-        console.log(data.type, ' play requested from ', data.from);
+        console.log(data.type, '|', data.from, '->', data.to);
+        var request_data = {
+                            id: id(),
+                            requester: data.from,
+                            receiver: data.to,
+                            type: data.type
+                            }
+        pendingPlays.push(request_data);
 
-        pendingPlays.push({
-            id: id(),
-            requester: data.from,
-            receiver: data.to,
-            type: data.type
-        });
-
-        io.emit('play request', data);
+        io.emit('play request', request_data);
     });
 
     socket.on('respond request', function(data){
-        
+        console.log('received:',data)
     });
 
 
@@ -132,8 +150,9 @@ io.on('connection', function(socket){
 
     socket.on('disconnect', function(){
         // numUsers--;
-        io.emit('status', "user disconnected");
         console.log('user disconnected');
+        io.emit('status', "user disconnected");
+        io.emit('status', "user disconnected");
     });
 
     socket.on('chat message', function(msg){

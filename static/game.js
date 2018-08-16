@@ -1,6 +1,7 @@
 var socket = io();
 //var score = 100;
 var playername;
+var local_players = [];
 
 function playEvil(player){
     console.log("playing evil" + player);
@@ -11,29 +12,32 @@ function playEvil(player){
 }
 
 function playGood(player){
-    console.log("playing good with" + player);
+    console.log("playing good with", player);
     //score-=10;
     socket.emit('play request', {type:"good",from:playername, to:player});
 }
 
-function addToActivePlayerList(player){
-    $('#activeplayers')
-    .append($('<li>').text(player)
-            .append(createGoodButtonFor(player))
-            .append(createEvilButtonFor(player))
-        );
+function respondingGood(player, playRequest){
+    console.log(playername, " responding good to", player, '\'s ', playRequest.data.type);
+    //score-=10;
+    socket.emit('respond request', {type:"good",from:playername, to:player});
 }
 
-function iJustConnected(players){
-    return players.indexOf(playername) == -1;
-}
-
-function createGoodButtonFor(player){
-    return $('<button id="play-good">')
-            .text("good")
-            .click(function(){
-                playGood(player);
-            });
+function createGoodButtonFor(player, playRequest=null){
+    if (playRequest){
+        return $('<button id="respond-good">')
+        .text("good")
+        .click(function(){
+            respondGood(player, playRequest);
+        });
+    }
+    else {
+        return $('<button id="play-good">')
+        .text("good")
+        .click(function(){
+            playGood(player);
+        });
+    }
 }
 
 function createEvilButtonFor(player){
@@ -44,25 +48,22 @@ function createEvilButtonFor(player){
             });
 }
 
-socket.on('login', function(data){
-    console.log('active users: ', data.numUsers);
-    $('#numactiveusers').text(data.numUsers);
-});
 
-socket.on('play request', function(data){
-    if (data.to==playername){
-        console.log('received play request: ', data.from, ' type: ', data.type);
+function addToActivePlayerList(player){
+    // TODO: instead of appending list items all the time, we should do it properly
+    $('#activeplayers')
+    .append($('<li>').text(player)
+            .append(createGoodButtonFor(player))
+            .append(createEvilButtonFor(player))
+        );
+}
 
-        $('#playrequests')
-        .append($('<li>').text(data.from)
-                .append($('<button id="play-good" onclick="playGood()">').text("good"))
-                .append($('<button id="play-evil" onclick="playEvil()">').text("evil"))
-            );
-    }
-    else{
-        console.log('not for me');
-    }
-});
+function isRegistered(player){
+    return local_players.indexOf(player) == -1;
+}
+
+
+
 
 
 
@@ -89,13 +90,6 @@ socket.on('disconnect', function(){
     console.log('server down!');
 });
 
-socket.on('fill active players', function(data){
-    if(iJustConnected(data.players)){
-        data.players.forEach(function(player){
-            addToActivePlayerList(player);
-        });
-    }
-});
 
 $(function () {
 
@@ -107,7 +101,7 @@ $(function () {
         return false;
     });
 
-    playername = $('#plid').text();
+    playername = $('#plid').text().replace(/ /g,'');
     socket.emit('add player', playername);
 
     // set player name
@@ -131,17 +125,40 @@ $(function () {
             console.log("user name needs to be specified");
         }
     });
-    
-    // // Whenever the server emits 'user joined', log it in the chat body
-    // socket.on('player added', (data) => {
-    //     log(data.username + ' joined');
-    //     addParticipantsMessage(data);
-    // });
-    socket.on('player added', function(data){
-        var other_playername = data.username;
-        console.log('player registered: ' + other_playername);
-        addToActivePlayerList(other_playername);
+
+    socket.on('fill active players', function(data){
+        // if (!(isRegistered(playername))){
+            local_players=data.players;
+            data.players.forEach(function(player){
+                addToActivePlayerList(player);
+            });
+        // }
     });
 
+    socket.on('login', function(data){
+        console.log('active users: ', data.numUsers);
+        $('#numactiveusers').text(data.numUsers);
+    });
+    
+    socket.on('player added', function(data){
+        var other_playername = data.username;
+        console.log('other player joined: ' + other_playername);
+        addToActivePlayerList(other_playername);
+    });
+    
+    socket.on('play request', function(data){
+        if (data.to==playername){
+            console.log('received play request: ', data.from, ' type: ', data.type);
+    
+            $('#playrequests')
+            .append($('<li>').text(data.from)
+                    .append(createGoodButtonFor(data.from))
+                    .append(createEvilButtonFor(data.from))
+                );
+        }
+        else{
+            console.log('not for me');
+        }
+    });
 
 });
