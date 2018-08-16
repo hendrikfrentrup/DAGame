@@ -9,8 +9,16 @@ app.get('/', function(req, res){
 
 io.on('connection', function(socket){
 
+    console.log('socketID:' + socket.id)
     console.log('a user connected');
+    // send private message to user with new ID
+    // send notification to other users that other players have joined!
+    // add player to potential player list
     io.emit('status', "now connected");
+
+    setInterval(function(){
+        socket.emit('stream', {'title': "A new title via Socket.IO!"});
+    }, 1000);
 
     socket.on('disconnect', function(){
         io.emit('status', "user disconnected");

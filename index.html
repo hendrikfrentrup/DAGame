@@ -89,216 +89,200 @@
 
 
 
-
-    <!-- template for the modal component -->
-    <script type="text/x-template" id="modal-template">
-        <transition name="modal">
-        <div class="modal-mask">
-            <div class="modal-wrapper">
-            <div class="modal-container">
-    
-                <div class="modal-header">
-                <slot name="header">
-                    default header
-                </slot>
-                </div>
-    
-                <div class="modal-body">
-                <slot name="body">
-                    default body
-                </slot>
-                </div>
-    
-                <div class="modal-footer">
-                <slot name="footer">
-                    default footer
-                    <button class="modal-default-button" @click="$emit('close')">
-                    OK
-                    </button>
-                </slot>
-                </div>
-            </div>
-            </div>
-        </div>
-        </transition>
-    </script>
-
-
     <div id="app">
+
         <h1>
             {{ message }}
         </h1>
-
+       
         <div>
-            <span><input v-model="playerid" autocomplete="off" /></span>
-            <span> You are monk </span> <span> {{ playerid }} </span>   
+            <p>
+                <span> Your player ID: </span> <span> {{ playerid }} </span>
+                <span> Change your player ID:
+                <input v-model="playerid" autocomplete="off" /></span>
+            </p>
         </div>
 
         <div>
             <h2><span> Your score: </span> <span> {{ score }} </span> </h2>
         </div> 
 
+        <hr>
 
-                <form v-on:submit.prevent="addNewTodo">
-                  <label for="new-todo">Add a round</label>
-                  <input
-                    v-model="newTodoText"
-                    id="new-todo"
-                    placeholder="round"
-                  >
-                  <button>Add</button>
-                </form>
-                <ul>
-                  <li
-                    is="todo-item"
-                    v-for="(todo, index) in todos"
-                    v-bind:key="todo.id"
-                    v-bind:title="todo.title"
-                    v-on:remove="todos.splice(index, 1)"
-                    v-on:click="showModal = true"
-                  ></li>
+        <div>
+            <h2> Play someone: </h2>
+        <!-- <form v-on:submit.prevent="addNewPlayer">
+            <label for="new-player">Add a player:</label>
+            <input
+            v-model="newPlayerName"
+            id="new-player"
+            placeholder="..."
+            >
+            <button>Add</button>
+            </form>
+        -->
+           <ul>
+                <li
+                is="player-item"
+                v-for="(player, index) in players"
+                v-bind:key="player.id"
+                v-bind:name="player.name"
+                v-on:play-good="addPlayRequest"
+                v-on:play-evil="score-=10"
+                ></li>
+            </ul>
 
-                    
-                </ul>
+        </div>
 
-        <ul>
-            <!-- <player-list players=players></player-list> -->
+        <!-- <ul>
             <li v-for="p in players">
                 {{ p.name }} (score: {{ p.score }})
-                <button v-on:click="showModal = true" id="show-modal">Pray.</button>
             </li>
-        </ul>
-                <!-- use the modal component, pass in the prop -->
-                <modal v-if="showModal" @close="showModal = false">
-                        <!--
-                        you can use custom content here to overwrite
-                        default content
-                        -->
-                        <h3 slot="header">Play a round.</h3>
-                        <h4 slot="body">You are playing player - Good or Evil</h4>
-                        <!-- <h4 slot="footer">Good or Evil</h4> -->
-                    </modal>
+        </ul> -->
+
+        <hr>
+
+
+
+        <div>
+            <h3> Someone wants to play: </h3>
+
+            {{ title }}
+
+            <ul>
+                <li
+                is="play-message"
+                v-for="(player, index) in playrequests"
+                v-bind:key="player.id"
+                v-bind:name="player.name"
+                ></li>
+            </ul>
+
+        </div>
+
+    <hr>
+
+        <div>
+            <h3> Backchannel: </h3>
+        </div>
+
+        <div>
+            <ul id="messages"></ul>
+            <form action="">
+            <input id="m" autocomplete="off" />
+            <button>Send</button>
+            </form>
+        </div>
 
     </div>
-
-
-    <br><hr><br>
-    <div>
-        <ul id="messages"></ul>
-        <form action="">
-          <input id="m" autocomplete="off" />
-          <button>Send</button>
-        </form>
-    </div>
-
-
 
     <script>
 
-
-
-        // register modal component
-        Vue.component('modal', {
-            props:['me','opponent'],
-            template: '#modal-template'
-        })
-
-        Vue.component('todo-item', {
+        Vue.component('player-item', {
             template: `
                 <li>
-                {{ title }}
-                <button v-on:click="$emit('remove')">Remove</button>
-                <button id="show-modal" @click="showModal = true">Pray.</button>
-                <modal v-if="showModal" @close="showModal = false"></modal>
+                {{ name }}
+                
+                <button id="play-good" v-on:click="$emit('play-good')">Good</button>
+                or
+                <button id="play-evil" v-on:click="$emit('play-evil')">Evil</button>
                 </li>
             `,
-            props: ['title']
-        })  
+            props: ['name']
+        }) 
+        
+        Vue.component('play-message', {
+            template: `
+                <li>
+                {{ name }} wants to play
+                </li>
+            `,
+            props: ['name']
+        })
 
-        // Vue.component('player-list', {
-        //     props:['players'],
-        //     template: `
-        //     <li v-for="p in players">
-        //         {{ p.name }} (score: {{ p.score }})
-        //         <!-- , v-bind:value="p.id" -->
-        //         <button id="show-modal" @click="showModal = true">Pray.</button>
-        //     </li>
-        //     `
-        // })
+
+        var socket = io();
+
+        socket.on('stream', function(msg){
+            app.title = msg.title;
+        });
+
+        socket.on('play', function(msg){
+            console.log('adding play: ' + msg);
+            app.playrequests.push({id: nextPlayerId, name: 'Player 5', score: 100})
+        });
 
         var app = new Vue({
             el: '#app',
+
             data: {
+                title:'test',
                 message: 'Decentralized Ominous God',
-                playerid: 100,
-                score: '1000',
-                showModal: false,
+                playerid: 1,
+                score: '100',
+
                 players: [
-                { id: 2, name: 'Monk 2', score: 100 },
-                { id: 3, name: 'Monk 3', score: 100 },
-                { id: 4, name: 'Monk 4', score: 100 }
+                    { id: 2, name: 'Player 2', score: 100 },
+                    { id: 3, name: 'Player 3', score: 100 },
+                    { id: 4, name: 'Player 4', score: 100 }
                 ],
 
-                newTodoText: '',
-                todos: [
-                {
-                    id: 1,
-                    title: 'round1',
-                },
-                {
-                    id: 2,
-                    title: 'round2',
-                },
-                {
-                    id: 3,
-                    title: 'round3'
-                }
+                playrequests: [
+                    { id: 2, name: 'Player 2' },
                 ],
-                nextTodoId: 4
+
+                newPlayerName: '',
+                nextPlayerId: 5,
             },
             
             methods: {
-                addNewTodo: function () {
-                this.todos.push({
-                    id: this.nextTodoId++,
-                    title: this.newTodoText
-                })
-                this.newTodoText = ''
+                addNewPlayer: function () {
+                    this.players.push({
+                        id: this.nextPlayerId++,
+                        name: this.newPlayerName,
+                        score: 100
+                    })
+                    this.newPlayerName = ''
+                },
+                addPlayRequest: function () {
+                    socket.emit('play', {
+                        id: this.nextPlayerId++,
+                        name: this.newPlayerName,
+                        score:100
+                    });
+                    // modify the DOM
+                    // this.playrequests.push({
+                    //     id: this.nextPlayerId++,
+                    //     name: this.newPlayerName,
+                    //     score:100
+                    // })
                 }
             }
         })
 
-        
 
+        // $(function () {
 
+        //     var socket = io();
 
+        //     $('form').submit(function(){
+        //         // $('#messages').append($('<li>').text('-'+msg));
+        //         socket.emit('chat message', $('#m').val());
+        //         $('#m').val('');
+        //         return false;
+        //     });
 
+        //     socket.on('chat message', function(msg){
+        //         console.log('chat msg: ' + msg);  
+        //         $('#messages').append($('<li>').text(msg));
+        //     });
 
+        //     socket.on('status', function(msg){
+        //         console.log('status: ' + msg);  
+        //         $('#messages').append($('<li style="color:blue;font-size:8px;">').text(msg));
+        //     });
 
-
-
-        $(function () {
-
-            var socket = io();
-
-            $('form').submit(function(){
-                // $('#messages').append($('<li>').text('-'+msg));
-                socket.emit('chat message', $('#m').val());
-                $('#m').val('');
-                return false;
-            });
-
-            socket.on('chat message', function(msg){
-                console.log('chat msg: ' + msg);  
-                $('#messages').append($('<li>').text(msg));
-            });
-
-            socket.on('status', function(msg){
-                console.log('status: ' + msg);  
-                $('#messages').append($('<li style="color:blue;font-size:8px;">').text(msg));
-            });
-
-        });
+        // });
 
 
 
