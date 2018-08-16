@@ -6,6 +6,8 @@ var url = require('url');
 
 var players = [];
 var pendingPlays = [];
+var scores = {};
+var initialScore = 100;
 
 var passwords = {
     'monk': 'pass',
@@ -41,7 +43,7 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
 app.get('/', auth, function(req, res){
-  res.render('index', {username: req.query.username, score: 100});
+  res.render('index', {username: req.query.username, score: initialScore});
 });
 
 app.get('/login', function (req, res) {
@@ -85,6 +87,7 @@ io.on('connection', function(socket){
         // we store the username in the socket session for this client
         socket.username = username;
         players.push(username);
+        scores[username] = initialScore;
         console.log('player registered: ', username ,', active players: ', players.length);
         io.emit('login', { numUsers: players.length });
 
@@ -119,7 +122,18 @@ io.on('connection', function(socket){
     });
 
     socket.on('respond request', function(data){
-        console.log(data);
+        
+        var play = pendingPlays.find(function(play){
+                        return play.id == data.id;
+                    });
+
+        var newScores = {};
+        newScores[play.requester] = 90;
+        newScores[play.receiver] = 80;
+
+        console.log(newScores);
+
+        io.emit('updated scores', newScores);
     });
 
 

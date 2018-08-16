@@ -116,6 +116,12 @@ socket.on('fill active players', function(data){
     }
 });
 
+socket.on('updated scores', function(scores){
+    if(scores.hasOwnProperty(playername)){
+        $('#score').text(scores[playername]);
+    }
+});
+
 $(function () {
 
     $('#send').submit(function(){
@@ -126,7 +132,7 @@ $(function () {
         return false;
     });
 
-    playername = $('#plid').text();
+    playername = $('#plid').text().trim();
     socket.emit('add player', playername);
     
     // // Whenever the server emits 'user joined', log it in the chat body
