@@ -22,6 +22,8 @@ app.use(session({
     saveUninitialized: true
 }));
 
+app.use(express.static('public'));
+
 app.set('view engine', 'pug');
 app.set('views', './views');
 
