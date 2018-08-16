@@ -4,6 +4,9 @@ var multipart = require('connect-multiparty');
 var multipartMiddleware = multipart();
 var url = require('url');
 
+var players = [];
+var pendingPlays = [];
+
 var passwords = {
     'monk': 'pass',
     'priest': 'word'
@@ -16,7 +19,7 @@ var auth = function(req, res, next) {
     res.redirect('/login');
 };
 
-var id = function(){
+var generateId = function(){
     return Math.random().toString(36).substr(2, 9);
 };
 
@@ -38,14 +41,10 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
 app.get('/', auth, function(req, res){
-  console.log(req.query.username);  
-  //res.sendFile(__dirname + '/views/index.html');
-  //res.sendFile(__dirname + '/index.html');
   res.render('index', {username: req.query.username, score: 100});
 });
 
 app.get('/login', function (req, res) {
-   //res.render('login', {title: 'DOG'});
    res.sendFile(__dirname + '/views/login.html');
 });
 
@@ -73,12 +72,7 @@ app.get('/logout', function (req, res) {
   res.redirect('/login');
 });
 
-var numUsers=0;
-var players = [];
-var pendingPlays = [];
-
 io.on('connection', function(socket){
-    //var addedUser = false;
 
     console.log('connection established, socketID:' + socket.id);
 
@@ -86,12 +80,11 @@ io.on('connection', function(socket){
 
     // when the client emits 'add player', this listens and executes
     socket.on('add player', function(username){
-        //if (addedUser) return;
+        if (players.indexOf(username) != -1) return;
 
         // we store the username in the socket session for this client
         socket.username = username;
         players.push(username);
-        //addedUser = true;
         console.log('player registered: ', username ,', active players: ', players.length);
         io.emit('login', { numUsers: players.length });
 
@@ -102,25 +95,31 @@ io.on('connection', function(socket){
         });
     });
 
-
-
     // request a play 
     socket.on('play request', function(data){
         // play requested from - to -> private message
         console.log(data.type, ' play requested from ', data.from);
 
+        var id = generateId();
+
         pendingPlays.push({
-            id: id(),
+            id: id,
             requester: data.from,
             receiver: data.to,
             type: data.type
         });
 
-        io.emit('play request', data);
+        console.log(pendingPlays);
+
+        io.emit('play request', {
+            id: id,
+            to: data.to,
+            from: data.from
+        });
     });
 
     socket.on('respond request', function(data){
-        
+        console.log(data);
     });
 
 
@@ -131,9 +130,8 @@ io.on('connection', function(socket){
     socket.broadcast.emit('bcstatus', "-joining the order");
 
     socket.on('disconnect', function(){
-        // numUsers--;
         io.emit('status', "user disconnected");
-        console.log('user disconnected');
+        console.log('user disconnected' + socket.username);
     });
 
     socket.on('chat message', function(msg){

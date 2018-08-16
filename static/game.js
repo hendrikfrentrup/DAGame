@@ -1,19 +1,22 @@
 var socket = io();
-//var score = 100;
 var playername;
 
 function playEvil(player){
     console.log("playing evil" + player);
-    //score-=10;
-    //$('#score').text(score);
-    //var recepient = "rrr";
     socket.emit('play request', {type:"evil",from:playername, to:player});
 }
 
 function playGood(player){
     console.log("playing good with" + player);
-    //score-=10;
     socket.emit('play request', {type:"good",from:playername, to:player});
+}
+
+function respondWithGood(id){
+    socket.emit('respond request', {type:"good", id: id});
+}
+
+function respondWithEvil(id){
+    socket.emit('respond request', {type:"evil", id: id});
 }
 
 function addToActivePlayerList(player){
@@ -36,11 +39,27 @@ function createGoodButtonFor(player){
             });
 }
 
+function createGoodResponseFor(id){
+    return $('<button>')
+            .text("good")
+            .click(function(){
+                respondWithGood(id);
+            });
+}
+
 function createEvilButtonFor(player){
     return $('<button id="play-evil">')
             .text("evil")
             .click(function(){
                 playEvil(player);
+            });
+}
+
+function createEvilResponseFor(id){
+    return $('<button>')
+            .text("evil")
+            .click(function(){
+                respondWithEvil(id);
             });
 }
 
@@ -54,9 +73,9 @@ socket.on('play request', function(data){
         console.log('received play request: ', data.from, ' type: ', data.type);
 
         $('#playrequests')
-        .append($('<li>').text(data.from)
-                .append($('<button id="play-good" onclick="playGood()">').text("good"))
-                .append($('<button id="play-evil" onclick="playEvil()">').text("evil"))
+        .append($('<li>').attr('id', data.id).text(data.from)
+                .append(createGoodResponseFor(data.id))
+                .append(createEvilResponseFor(data.id))
             );
     }
     else{
@@ -109,28 +128,6 @@ $(function () {
 
     playername = $('#plid').text();
     socket.emit('add player', playername);
-
-    // set player name
-    $('#setplayerid').submit(function(){
-        playername = $('#playerid').val();
-
-        if (playername) {
-            console.log('registering as player: ' + playername); 
-
-            // when success, then set?
-            $('#playerid').val('');
-            $('#score').text(score);
-            $('#plid').text(playername);
-
-            socket.emit('add player', playername);
-
-            return false;
-
-        }
-        else {
-            console.log("user name needs to be specified");
-        }
-    });
     
     // // Whenever the server emits 'user joined', log it in the chat body
     // socket.on('player added', (data) => {
