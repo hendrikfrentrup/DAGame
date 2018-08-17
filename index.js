@@ -8,6 +8,8 @@ var players = [];
 var pendingPlays = [];
 var scores = {};
 var initialScore = 100;
+var goodAction = 'good';
+var evilAction = 'evil';
 
 var passwords = {
     'monk': 'pass',
@@ -26,8 +28,10 @@ var generateId = function(){
 };
 
 var updateScores = function(play, receiverResponse){
-    scores[play.requester] += 10;
-    scores[play.receiver] -= 10;
+    var gains = calculateGains(play.type, receiverResponse);
+
+    scores[play.requester] += gains.requester;
+    scores[play.receiver] += gains.receiver;
 };
 
 var session = require('express-session');
@@ -36,6 +40,18 @@ app.use(session({
     resave: true,
     saveUninitialized: true
 }));
+
+var calculateGains = function(requesterAction, receiverAction){
+    if(requesterAction == goodAction && receiverAction == goodAction){
+        return { requester: 1, receiver: 1 };
+    }else if (requesterAction == goodAction && receiverAction == evilAction){
+        return { requester: -10, receiver: 20 };
+    }else if (requesterAction == evilAction && receiverAction == goodAction){
+        return { requester: 20, receiver: -10 };
+    }else {
+        return { requester: -10, receiver: -10 };
+    }
+};
 
 app.use(express.static('public'));
 app.use(express.static('static'));
@@ -47,7 +63,7 @@ app.set('views', './views');
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
-app.get('/', auth, function(req, res){
+app.get('/', /*auth,*/ function(req, res){
   res.render('index', {username: req.query.username, score: initialScore});
 });
 
