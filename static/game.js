@@ -87,7 +87,7 @@ socket.on('private message', function (from, msg) {
 
 socket.on('chat message', function(msg){
     console.log('receiving chat msg: ' + msg);  
-    $('#messages').append($('<li>').text(msg));
+    $('#messages').append($('<li>').text(msg.author + ':' + msg.content));
 });
 
 socket.on('status', function(msg){
@@ -128,7 +128,10 @@ $(function () {
     $('#send').submit(function(){
         // $('#messages').append($('<li>').text('-'+msg));
         console.log('sending out chat msg: ' + $('#m').val()); 
-        socket.emit('chat message', $('#m').val());
+        socket.emit('chat message', {
+            author: playername,
+            content: $('#m').val()
+        });
         $('#m').val('');
         return false;
     });

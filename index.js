@@ -41,9 +41,7 @@ var calculateGains = function(requesterAction, receiverAction){
     }
 };
 
-app.use(express.static('public'));
 app.use(express.static('static'));
-app.use(express.static('scripts'));
 
 app.set('view engine', 'pug');
 app.set('views', './views');
