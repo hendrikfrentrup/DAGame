@@ -53,6 +53,10 @@ app.get('/', simplerAuth, function(req, res){
   res.render('index', {username: req.query.username, score: initialScore});
 });
 
+app.get('/login', function(req, res){
+    res.render('landing');
+  });
+
 app.get('/tryagain', function (req, res) {
    res.sendFile(__dirname + '/views/tryagain.html');
 });
@@ -144,6 +148,8 @@ io.on('connection', function(socket){
 
 });
 
-http.listen(3000, function(){
+var process = require('process');
+
+http.listen(process.env.PORT || 3000, function(){
   console.log('listening on *:3000');
 });
