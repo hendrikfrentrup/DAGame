@@ -125,7 +125,12 @@ socket.on('updated scores', function(scores){
 
     console.log(scores);
     $('#leaderboard').empty();
-    Object.keys(scores).sort().forEach(function(player){
+    Object
+    .keys(scores)
+    .sort(function(player1, player2){
+        return scores[player2] - scores[player1];
+    })
+    .forEach(function(player){
         addToLeaderBoard(player, scores[player]);
     });
 });
