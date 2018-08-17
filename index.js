@@ -23,6 +23,13 @@ var auth = function(req, res, next) {
     res.redirect('/login');
 };
 
+var simplerAuth = function(req, res, next) {
+  if (players.indexOf(req.query.username) == -1)
+    return next();
+  else
+    res.redirect('/tryagain');
+};
+
 var generateId = function(){
     return Math.random().toString(36).substr(2, 9);
 };
@@ -63,12 +70,16 @@ app.set('views', './views');
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
-app.get('/', /*auth,*/ function(req, res){
+app.get('/', simplerAuth, function(req, res){
   res.render('index', {username: req.query.username, score: initialScore});
 });
 
 app.get('/login', function (req, res) {
    res.sendFile(__dirname + '/views/login.html');
+});
+
+app.get('/tryagain', function (req, res) {
+   res.sendFile(__dirname + '/views/tryagain.html');
 });
 
 app.post('/login', multipartMiddleware, function (req, res) {
