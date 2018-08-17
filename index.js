@@ -57,6 +57,13 @@ app.get('/tryagain', function (req, res) {
    res.sendFile(__dirname + '/views/tryagain.html');
 });
 
+app.get('/reset', function(req, res){
+    players = [];
+    pendingPlays = [];
+    scores = {};
+    res.send('game reset');
+});
+
 io.on('connection', function(socket){
 
     console.log('connection established, socketID:' + socket.id);
