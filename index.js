@@ -11,18 +11,6 @@ var initialScore = 100;
 var goodAction = 'good';
 var evilAction = 'evil';
 
-var passwords = {
-    'monk': 'pass',
-    'priest': 'word'
-};
-
-var auth = function(req, res, next) {
-  if (req.session && passwords.hasOwnProperty(req.session.user))
-    return next();
-  else
-    res.redirect('/login');
-};
-
 var simplerAuth = function(req, res, next) {
   if (players.indexOf(req.query.username) == -1)
     return next();
@@ -40,13 +28,6 @@ var updateScores = function(play, receiverResponse){
     scores[play.requester] += gains.requester;
     scores[play.receiver] += gains.receiver;
 };
-
-var session = require('express-session');
-app.use(session({
-    secret: '2C44-4D44-WppQ38S',
-    resave: true,
-    saveUninitialized: true
-}));
 
 var calculateGains = function(requesterAction, receiverAction){
     if(requesterAction == goodAction && receiverAction == goodAction){
@@ -74,36 +55,8 @@ app.get('/', simplerAuth, function(req, res){
   res.render('index', {username: req.query.username, score: initialScore});
 });
 
-app.get('/login', function (req, res) {
-   res.sendFile(__dirname + '/views/login.html');
-});
-
 app.get('/tryagain', function (req, res) {
    res.sendFile(__dirname + '/views/tryagain.html');
-});
-
-app.post('/login', multipartMiddleware, function (req, res) {
-
-    console.log(req.body);
-
-    if (req.body.username && passwords.hasOwnProperty(req.body.username) && req.body.password && req.body.password == passwords[req.body.username]) {
-            req.session.authenticated = true;
-            req.session.user = req.body.username;
-            res.redirect(url.format({
-               pathname:"/",
-               query: {
-                  "username": req.body.username
-                }
-             }));
-    } else {
-        res.redirect('/login');
-    }
-
-});
-
-app.get('/logout', function (req, res) {
-  req.session.destroy();
-  res.redirect('/login');
 });
 
 io.on('connection', function(socket){
@@ -117,7 +70,6 @@ io.on('connection', function(socket){
         if (players.indexOf(username) != -1) return;
 
         // we store the username in the socket session for this client
-        socket.username = username;
         players.push(username);
         scores[username] = initialScore;
         console.log('player registered: ', username ,', active players: ', players.length);
