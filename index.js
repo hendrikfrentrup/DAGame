@@ -77,7 +77,7 @@ io.on('connection', function(socket){
 
         // echo globally (all clients) that a person has connected
         socket.broadcast.emit('player added', {
-            username: socket.username,
+            username: username,
             numUsers: players.length
         });
     });
@@ -129,7 +129,7 @@ io.on('connection', function(socket){
 
     socket.on('disconnect', function(){
         io.emit('status', "user disconnected");
-        console.log('user disconnected' + socket.username);
+        console.log('user disconnected');
     });
 
     socket.on('chat message', function(msg){
