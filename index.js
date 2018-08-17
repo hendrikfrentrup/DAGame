@@ -53,8 +53,19 @@ app.get('/', simplerAuth, function(req, res){
   res.render('index', {username: req.query.username, score: initialScore});
 });
 
+app.get('/login', function(req, res){
+    res.render('landing');
+  });
+
 app.get('/tryagain', function (req, res) {
    res.sendFile(__dirname + '/views/tryagain.html');
+});
+
+app.get('/reset', function(req, res){
+    players = [];
+    pendingPlays = [];
+    scores = {};
+    res.send('game reset');
 });
 
 io.on('connection', function(socket){
