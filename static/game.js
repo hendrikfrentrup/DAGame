@@ -27,6 +27,11 @@ function addToActivePlayerList(player){
         );
 }
 
+function addToLeaderBoard(player, score){
+    $('#leaderboard')
+    .append($('<li>').text(player + ': ' + score));
+}
+
 function createGoodButtonFor(player){
     return $('<button id="play-good">')
             .text("good")
@@ -117,6 +122,12 @@ socket.on('updated scores', function(scores){
     if(scores.hasOwnProperty(playername)){
         $('#score').text(scores[playername]);
     }
+
+    console.log(scores);
+    $('#leaderboard').empty();
+    Object.keys(scores).sort().forEach(function(player){
+        addToLeaderBoard(player, scores[player]);
+    });
 });
 
 socket.on('remove pending play', function(id){
